@@ -6,7 +6,7 @@ arruelas para repor o estoque. Todos os itens são vendidos em pacotes fechados 
 possuem suas versões finas e grossas. O valor dos itens finos são: Porcas(R$30,52), Parafusos(R$28,75), 
 Soberbos(R$29,63), Arruelas(R$26,74).
 Os itens grossos são: Porcas(R$36,13), Parafusos(R$34,19), Soberbos(R$35,48), Arruelas(R$31,32).
-A empresa disponibiliza de 500 reais para a aquisição destes insumos. Deve ser adiquirido todos os itens na maior
+A empresa disponibiliza de R$1500 para a aquisição destes insumos. Deve ser adiquirido todos os itens na maior
 quantidade possível, respeitando o dinheiro disponível e adiquirindo todos os itens. 
 A proporção de compra para porcas/arruelas/parafusos se da pela proporção seguinte proporção:
 Porca/Parafuso= 1:1
@@ -15,6 +15,8 @@ Soberbo/Arruela= 1:1
 Parafuso/Arruela= 1:2
 '''
 import random
+from unicodedata import name
+import pandas as pd
 
 #Etapas:
 # -Inicialização: Setar cromossomos aleatórios
@@ -32,16 +34,34 @@ import random
 #A ordem dos cromossomos será, nos dois grupos, Parafuso(Pa), Porca(Po), Soberbo(So), Arruela(Ar); Cada população 
 #proposta como solução terá 7 genes; O mais bem adaptado será mantido por elitismo.
 
-#Etapa 0: Funções a serem utilizadas
-def cromos():
-    return random.randint(0, 50)
+#Etapa 0: Predefinições a serem usadas no sistema
+def randomizar():
+    return random.randint(1, 10)
+#DataFrame com os valores dos itens
+VALORES = pd.Series([30.52, 28.75, 29.63, 26.74, 36.13, 34.19, 35.48, 31.32])
 
-#Etapa 1: Inicialização (Criar gene e setar cromossomos aleatórios)
-gene = []
-cromossomo = [cromos(), cromos(), cromos(), cromos(), cromos(), cromos(), cromos(), cromos()]
+#Constantes
+LIMITE = 1500
+
+#Variaveis auxiliares na iteração dos laços
+adaptacao = []
+acumulador = 0
+
+#Etapa 1: Inicialização (Criar gene/cromossomos e seta valores aleatórios nestes)
+cromossomo = []
 for x in range(7):
-    gene.append(cromossomo)
-print(gene)
+    cromossomo.append([randomizar(), randomizar(), randomizar(), randomizar(), randomizar(), randomizar(), randomizar(), randomizar()])
+
+populacao = pd.DataFrame(cromossomo, columns=['ParFin', 'ParGros', 'SobFin', 'SobGros', 'PorFin', 'PorGros', 'ArrFin', 'ArrGros'])
 
 #Etapa 2: Fitness (Medir a adaptação dos cromossomos)
+for x in range(7):
+    acumulador = 0
+    for y in range(8):
+        acumulador += populacao.iloc[x, y] * VALORES.iloc[y]
+    acumulador -= LIMITE
+    adaptacao.append(acumulador)
 
+adaptacao = pd.DataFrame(adaptacao, columns=['fitness'])
+
+print(adaptacao)
