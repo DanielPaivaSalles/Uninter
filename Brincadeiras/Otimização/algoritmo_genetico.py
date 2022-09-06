@@ -36,16 +36,18 @@ import pandas as pd
 
 #Etapa 0: Predefinições a serem usadas no sistema
 def randomizar():
-    return random.randint(1, 10)
+    return random.randint(1, 15)
 #DataFrame com os valores dos itens
-VALORES = pd.Series([30.52, 28.75, 29.63, 26.74, 36.13, 34.19, 35.48, 31.32])
+VALORES = pd.Series([15, 14, 15, 14, 18, 17, 16, 16])
 
 #Constantes
-LIMITE = 1500
+LIMITE = 1000
 
 #Variaveis auxiliares na iteração dos laços
 adaptacao = []
 acumulador = 0
+indice = 0
+flag = False
 
 #Etapa 1: Inicialização (Criar gene/cromossomos e seta valores aleatórios nestes)
 cromossomo = []
@@ -64,4 +66,14 @@ for x in range(7):
 
 adaptacao = pd.DataFrame(adaptacao, columns=['fitness'])
 
+#Etapa 3: Elitismo (Vamos passar para a proxima geração o gene que mais se aproximar do ótimo sem ultrapassar o limite,
+#         aqui o acumulador possúi um valor arbitrário só para iniciar de algum lugar)
+for x in range(7):
+    if(acumulador <= adaptacao.iloc[x, 0]):
+        if(flag):
+            acumulador = adaptacao.iloc[x, 0]
+            indice = x
+
 print(adaptacao)
+print(indice)
+print(acumulador)
