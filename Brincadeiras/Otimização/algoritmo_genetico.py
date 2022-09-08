@@ -15,7 +15,6 @@ Soberbo/Arruela= 1:1
 Parafuso/Arruela= 1:2
 '''
 import random
-from unicodedata import name
 import pandas as pd
 
 #Etapas:
@@ -37,7 +36,7 @@ import pandas as pd
 #Etapa 0: Predefinições a serem usadas no sistema
 def randomizar():
     return random.randint(1, 15)
-#DataFrame com os valores dos itens
+#DataFrame/Series com os valores dos itens
 VALORES = pd.Series([15, 14, 15, 14, 18, 17, 16, 16])
 
 #Constantes
@@ -47,7 +46,8 @@ LIMITE = 1000
 adaptacao = []
 acumulador = 0
 indice = 0
-flag = False
+flag = True
+elitizado = pd.DataFrame()
 
 #Etapa 1: Inicialização (Criar gene/cromossomos e seta valores aleatórios nestes)
 cromossomo = []
@@ -64,16 +64,18 @@ for x in range(7):
     acumulador -= LIMITE
     adaptacao.append(acumulador)
 
-adaptacao = pd.DataFrame(adaptacao, columns=['fitness'])
+adaptacao = pd.DataFrame(adaptacao)
 
-#Etapa 3: Elitismo (Vamos passar para a proxima geração o gene que mais se aproximar do ótimo sem ultrapassar o limite,
-#         aqui o acumulador possúi um valor arbitrário só para iniciar de algum lugar)
+#Etapa 3: Elitismo (Vamos passar para a proxima geração o gene que mais se aproximar do ótimo sem ultrapassar o limite
 for x in range(7):
-    if(acumulador <= adaptacao.iloc[x, 0]):
-        if(flag):
-            acumulador = adaptacao.iloc[x, 0]
-            indice = x
+    if flag:
+        acumulador = adaptacao.iloc[x, 0]
+        indice = x
+        flag = False
+    elif(acumulador**2 >= adaptacao.iloc[x, 0]**2):
+        acumulador = adaptacao.iloc[x, 0]
+        indice = x
 
-print(adaptacao)
-print(indice)
-print(acumulador)
+#Etapa 4: Crossover (O gene mais bem adaptado vai ficar na posição 0 do dataframe. Os demais irão trocar as 
+#         caracteristicas entre sí)
+print(adaptacao[indice, 0])
