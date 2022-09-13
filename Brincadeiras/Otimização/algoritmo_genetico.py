@@ -14,6 +14,7 @@ Parafuso/Soberbo= 1:1
 Soberbo/Arruela= 1:1
 Parafuso/Arruela= 1:2
 '''
+import itertools
 import random
 import pandas as pd
 
@@ -34,8 +35,17 @@ import pandas as pd
 #proposta como solução terá 7 genes; O mais bem adaptado será mantido por elitismo.
 
 #Etapa 0: Predefinições a serem usadas no sistema
+#O metodo randomizar irá retornar os cromossomos do meu gene
+#O metodo adaptabilidade irá retornar o gene mais bem adaptado de forma ponderada, sendo a escala de adaptabilidade
+#a ser utilizada como, aproximadamente: 0.5, 0.25, 0.125, 0.625, 0.03125, 0.015625
 def randomizar():
     return random.randint(1, 15)
+
+def adaptabilidade(adaptacao):
+    adaptacao = adaptacao**2
+    adaptacao = adaptacao.sort_values(by=0, ascending=False)
+    return adaptacao.sample(n = 1, weights=[1, 2, 4, 8, 16, 32])
+
 #DataFrame/Series com os valores dos itens
 VALORES = pd.Series([15, 14, 15, 14, 18, 17, 16, 16])
 
@@ -76,6 +86,11 @@ for x in range(7):
         acumulador = adaptacao.iloc[x, 0]
         indice = x
 
+
 #Etapa 4: Crossover (O gene mais bem adaptado vai ficar na posição 0 do dataframe. Os demais irão trocar as 
 #         caracteristicas entre sí)
-print(adaptacao[indice, 0])
+
+#Etapa 4.1: Seleção por roleta (Os genes serão selecionados aleatoriamente de forma ponderada, tendo o mais adaptado com
+#maiores chances de transmitir seu gene e o menos adaptado com menores chances.)
+print(adaptacao.iloc[[0, 1, 2, 3, 4, 5, 6]])
+#nova_geracao = adaptabilidade(adaptacao)
