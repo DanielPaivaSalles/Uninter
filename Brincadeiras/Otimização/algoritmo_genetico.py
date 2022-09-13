@@ -110,8 +110,18 @@ Etapa 4
 populacao_crossover = populacao.drop(indice)
 populacao_crossover = populacao_crossover.reset_index(drop=True)
 
-print(populacao_crossover.iloc[[0]])
-print(populacao_crossover.iloc[[1]])
+
+gene_series_1 = populacao_crossover.iloc[0]
+gene_series_2 = populacao_crossover.iloc[1]
+gene_series_1_concat = pd.concat([gene_series_1[0:4],gene_series_2[4:8]], ignore_index=True)
+gene_series_2_concat = pd.concat([gene_series_2[0:4],gene_series_1[4:8]], ignore_index=True)
+print(gene_series_1_concat)
+print(gene_series_2_concat)
+#for x in range(6):
+#    gene_series_1 = populacao_crossover.iloc[x]
+#    gene_series_2 = populacao_crossover.iloc[x+1]
+
+
 #for x in range(6):
 #    for y in range(8):
 #        pass
