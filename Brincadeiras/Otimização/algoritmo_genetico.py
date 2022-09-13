@@ -14,16 +14,16 @@ Parafuso/Soberbo= 1:1
 Soberbo/Arruela= 1:1
 Parafuso/Arruela= 1:2
 '''
-import itertools
+from cProfile import label
 import random
 import pandas as pd
 
 #Etapas:
-# -Inicialização: Setar cromossomos aleatórios
-# -Medir a adaptação
-# -Elitismo
-# -Crossover
-# --Roleta
+# -Inicialização: Setar cromossomos aleatórios --CHECK
+# -Medir a adaptação --CHECK
+# -Elitismo --CHECK
+# -Crossover 
+# --Roleta --CHECK
 # --Ponto de corte
 # -Mutação
 # -Ir pra proxima geração
@@ -33,40 +33,52 @@ import pandas as pd
 #em duas partes, os quatro primeiros cromossomos pertencerão ao conjunto fino e os quatro ultimos ao conjunto grosso;
 #A ordem dos cromossomos será, nos dois grupos, Parafuso(Pa), Porca(Po), Soberbo(So), Arruela(Ar); Cada população 
 #proposta como solução terá 7 genes; O mais bem adaptado será mantido por elitismo.
+'''
+ETAPA 0
+-Constantes
+-Variaveis
+-Metodos
+'''
+#Constantes
+#Valores = preço de cada parafuso
+VALORES = pd.Series([15, 14, 15, 14, 18, 17, 16, 16])
+#Limite = numero de iterações de evolução
+LIMITE = 1000
 
-#Etapa 0: Predefinições a serem usadas no sistema
 #O metodo randomizar irá retornar os cromossomos do meu gene
-#O metodo adaptabilidade irá retornar o gene mais bem adaptado de forma ponderada, sendo a escala de adaptabilidade
-#a ser utilizada como, aproximadamente: 0.5, 0.25, 0.125, 0.625, 0.03125, 0.015625
 def randomizar():
     return random.randint(1, 15)
 
+#O metodo de adaptabilidade vai retornar os genes mais adaptados por roleta, ponderando o mais e o menos adaptado
 def adaptabilidade(adaptacao):
+    #atributo adaptacao vai receber o quadrado de si mesmo para retirar valores negativos
     adaptacao = adaptacao**2
+    #atributo adaptacao vai ordenar valores do menos apto ao mais apto
     adaptacao = adaptacao.sort_values(by=0, ascending=False)
-    return adaptacao.sample(n = 1, weights=[1, 2, 4, 8, 16, 32])
+    #retorno com os dados ordenados e ponderados conforme sua adaptabilidade
+    return adaptacao.sample(n = 6, weights=[1, 2, 4, 8, 16, 32])
 
-#DataFrame/Series com os valores dos itens
-VALORES = pd.Series([15, 14, 15, 14, 18, 17, 16, 16])
+#O metodo de cruzamento vai pegar dois genes mais bem adaptados para cruzar os cromossomos
+def cruzamento(adaptacao):
+    teste = adaptabilidade(adaptacao)
+    #genes_cruzados = pd.DataFrame([adaptabilidade(adaptacao)], [adaptabilidade(adaptacao)])
+    return teste
 
-#Constantes
-LIMITE = 1000
-
-#Variaveis auxiliares na iteração dos laços
-adaptacao = []
-acumulador = 0
-indice = 0
-flag = True
-elitizado = pd.DataFrame()
-
-#Etapa 1: Inicialização (Criar gene/cromossomos e seta valores aleatórios nestes)
+'''
+ETAPA 1
+-Criação inicial de cromossomos
+'''
 cromossomo = []
 for x in range(7):
     cromossomo.append([randomizar(), randomizar(), randomizar(), randomizar(), randomizar(), randomizar(), randomizar(), randomizar()])
 
-populacao = pd.DataFrame(cromossomo, columns=['ParFin', 'ParGros', 'SobFin', 'SobGros', 'PorFin', 'PorGros', 'ArrFin', 'ArrGros'])
+populacao = pd.DataFrame(cromossomo)
 
-#Etapa 2: Fitness (Medir a adaptação dos cromossomos)
+'''
+ETAPA 2
+-Calculo de adaptabilidade dos genes
+'''
+adaptacao = []
 for x in range(7):
     acumulador = 0
     for y in range(8):
@@ -76,7 +88,11 @@ for x in range(7):
 
 adaptacao = pd.DataFrame(adaptacao)
 
-#Etapa 3: Elitismo (Vamos passar para a proxima geração o gene que mais se aproximar do ótimo sem ultrapassar o limite
+'''
+ETAPA 3
+-Elitismo, separação do melhor gene para a proxima população.
+'''
+flag = True
 for x in range(7):
     if flag:
         acumulador = adaptacao.iloc[x, 0]
@@ -85,12 +101,20 @@ for x in range(7):
     elif(acumulador**2 >= adaptacao.iloc[x, 0]**2):
         acumulador = adaptacao.iloc[x, 0]
         indice = x
+nova_populacao = populacao.iloc[[indice]]
 
+'''
+Etapa 4
+-Crossover, cruzamento de cromossomos para a geração da nova população.
+'''
+populacao_crossover = populacao.drop(indice)
+populacao_crossover = populacao_crossover.reset_index(drop=True)
 
-#Etapa 4: Crossover (O gene mais bem adaptado vai ficar na posição 0 do dataframe. Os demais irão trocar as 
-#         caracteristicas entre sí)
-
+print(populacao_crossover.iloc[[0]])
+print(populacao_crossover.iloc[[1]])
+#for x in range(6):
+#    for y in range(8):
+#        pass
 #Etapa 4.1: Seleção por roleta (Os genes serão selecionados aleatoriamente de forma ponderada, tendo o mais adaptado com
 #maiores chances de transmitir seu gene e o menos adaptado com menores chances.)
-print(adaptacao.iloc[[0, 1, 2, 3, 4, 5, 6]])
-#nova_geracao = adaptabilidade(adaptacao)
+#nova_geracao = cruzamento(adaptacao.iloc[[1, 2, 3, 4, 5, 6]])
